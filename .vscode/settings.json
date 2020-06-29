@@ -1,0 +1,6 @@
+{
+  "deno.enable": false,
+  "material-icon-theme.files.associations": {
+    "*.resolver.ts": "graphql"
+  }
+}

@@ -1,0 +1,108 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type accountValidationDTO {
+  id: ID!
+  token: String!
+  isValid: Boolean!
+  validDate: DateTime!
+  user: UserDTO
+  user_id: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type ProfilePicDTO {
+  id: ID!
+  url: String!
+  name: String!
+  originalName: String!
+}
+
+type UserDTO {
+  id: ID!
+  email: String!
+  password: String!
+  name: String!
+  status: String!
+  accountValidation: accountValidationDTO!
+  profile: ProfilePicDTO!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AuthDTO {
+  token: String!
+  user: UserDTO!
+}
+
+type FriendDTO {
+  id: Float!
+  sender: UserDTO!
+  recipient: UserDTO!
+  accepted_date: DateTime
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ChatDTO {
+  id: Float!
+  user1: UserDTO!
+  user2: UserDTO!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type MessageDTO {
+  id: Float!
+  content: String!
+  see: Boolean!
+  sender: UserDTO!
+  chat: ChatDTO!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Query {
+  getUsers: [UserDTO!]!
+  getUser(id: Float!): UserDTO!
+  listFriendsRequests: [FriendDTO!]!
+  listFriends: [FriendDTO!]!
+  listChats: [ChatDTO!]!
+  listMessages(chatId: Float!): [MessageDTO!]!
+}
+
+type Mutation {
+  createUser(data: CreateUserInputDTO!): UserDTO!
+  editUser(data: EditUserInputDTO!, id: Float!): UserDTO!
+  login(password: String!, email: String!): AuthDTO!
+  sendFriendRequest(id: Float!): FriendDTO!
+  rejectFriend(id: Float!): FriendDTO!
+  acceptFriend(id: Float!): FriendDTO!
+  sendMessage(content: String!, chatId: Float!): MessageDTO!
+  createChat(friendId: Float!): ChatDTO!
+}
+
+input CreateUserInputDTO {
+  email: String!
+  password: String!
+  status: String = "Disponível"
+  name: String!
+}
+
+input EditUserInputDTO {
+  status: String
+  name: String
+  user_name: String
+}
+
+type Subscription {
+  watchMessages: MessageDTO!
+}
