@@ -8,10 +8,13 @@ import { AuthModule } from './auth/auth.module';
 import { FriendsModule } from './friends/friends.module';
 import { ChatModule } from './chat/chat.module';
 import { ApolloDriver } from '@nestjs/apollo';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmFactory } from './config/typeorm.factory';
 
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.graphql',
       driver: ApolloDriver,
@@ -33,14 +36,10 @@ import { ApolloDriver } from '@nestjs/apollo';
         return { req }
       },
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      database: 'test',
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: TypeOrmFactory,
+      inject: [ConfigService]
     }),
     FileModule,
     UserModule,
