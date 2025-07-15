@@ -7,13 +7,17 @@ import { FileModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
 import { FriendsModule } from './friends/friends.module';
 import { ChatModule } from './chat/chat.module';
+import { ApolloDriver } from '@nestjs/apollo';
 
 
 @Module({
   imports: [
-  	GraphQLModule.forRoot({
+    GraphQLModule.forRoot({
       autoSchemaFile: 'schema.graphql',
-      installSubscriptionHandlers: true,
+      driver: ApolloDriver,
+      subscriptions: {
+        'graphql-ws': true
+      },
       formatError: (err) => ({
         ...err,
         extensions: {
@@ -45,4 +49,4 @@ import { ChatModule } from './chat/chat.module';
     ChatModule
   ],
 })
-export class AppModule {}
+export class AppModule { }

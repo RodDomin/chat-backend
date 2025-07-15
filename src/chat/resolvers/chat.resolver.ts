@@ -6,7 +6,8 @@ import { ChatDTO } from '../dtos/chat.dto';
 import { MessageDTO } from '../dtos/messages.dto';
 import { ChatService } from '../chat.service';
 import { GetCurrentUser } from 'src/utils/GetCurrentUser.util';
-import { PubSub } from 'apollo-server-express';
+
+import { PubSub } from "graphql-subscriptions";
 
 @Resolver()
 export class ChatResolver {
@@ -79,6 +80,6 @@ export class ChatResolver {
   public async watchMessages(
     @GetCurrentUser() userId: number
   ) {
-    return this.pubSub.asyncIterator(`watchMessages:${userId}`)
+    return this.pubSub.asyncIterableIterator(`watchMessages:${userId}`)
   }
 }

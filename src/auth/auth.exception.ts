@@ -1,11 +1,15 @@
-import { ApolloError } from "apollo-server-express";
 import { HttpException } from "@nestjs/common";
+import { GraphQLError } from "graphql";
 
-export class AuthError extends ApolloError {
+export class AuthError extends GraphQLError {
   constructor (code: string) {
     super(
       'authentication error',
-      code,
+      {
+        extensions: {
+          code,
+        }
+      },
     )
   }
 }

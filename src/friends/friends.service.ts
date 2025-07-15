@@ -17,8 +17,8 @@ export class FriendsService {
   async listRequests(id: number): Promise<Friend[]> {
     return await this.friendRepository.find({
       where: [
-        { sender: id, status: FRIEND_STATUS.PENDING },
-        { recipient: id, status: FRIEND_STATUS.PENDING }
+        { sender: { id }, status: FRIEND_STATUS.PENDING },
+        { recipient: { id }, status: FRIEND_STATUS.PENDING }
       ],
       relations: ['sender', 'recipient']
     });
@@ -27,8 +27,8 @@ export class FriendsService {
   async listFriends(id: number): Promise<Friend[]> {
     return await this.friendRepository.find({
       where: [
-        { sender: id, status: FRIEND_STATUS.ACCEPTED },
-        { recipient: id, status: FRIEND_STATUS.ACCEPTED }
+        { sender: { id }, status: FRIEND_STATUS.ACCEPTED },
+        { recipient: { id }, status: FRIEND_STATUS.ACCEPTED }
       ],
       relations: ['sender', 'recipient']
     });
@@ -48,39 +48,36 @@ export class FriendsService {
     return friend;
   }
 
-  async accept(id: number): Promise<Friend> {
-    const friend_request = await this.friendRepository.findOne(id);
-
-    friend_request.status = FRIEND_STATUS.ACCEPTED;
-    friend_request.accepted_date = new Date();
-
-    await friend_request.save();
-
-    return friend_request;
+  accept(id: number): Promise<Friend> {
+    return this.updateFriendStatus(id, FRIEND_STATUS.ACCEPTED);
   }
   
-  async reject(id: number): Promise<Friend> {
-    const friend_request = await this.friendRepository.findOne(id);
+  reject(id: number): Promise<Friend> {
+    return this.updateFriendStatus(id, FRIEND_STATUS.REJECTED);
+  }
 
-    friend_request.status = FRIEND_STATUS.REJECTED;
-    friend_request.accepted_date = new Date();
+  private async updateFriendStatus(id: number, status: FRIEND_STATUS) {
+    const friendRequest = await this.friendRepository.findOneBy({ id });
 
-    await friend_request.save();
+    friendRequest.status = status;
+    friendRequest.accepted_date = new Date();
 
-    return friend_request;
+    await friendRequest.save();
+
+    return friendRequest;
   }
 
   async findOne(id: number): Promise<Friend> {
     return await this.friendRepository.findOne({
-      where: { recipient: id }
+      where: { recipient: { id } }
     });
   }
 
   async findBySenderOrRecipient(userId: number, friendId: number): Promise<Friend> {
     return await this.friendRepository.findOne({
       where: [
-        { sender: userId, recipient: friendId },
-        { sender: friendId, recipient: userId }
+        { sender: { id: userId }, recipient: { id: friendId } },
+        { sender: { id: friendId }, recipient: { id: userId } }
       ],
     });
   }

@@ -1,11 +1,10 @@
-import { ApolloError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 
-export class UserErrors extends ApolloError {
+export class UserErrors extends GraphQLError {
   constructor(message: string, code: string, status: number) {
     super(
       message,
-      code,
-      { status },
+      { extensions: { code } },
     );
   }
 }

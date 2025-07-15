@@ -65,7 +65,7 @@ export class UserResolver {
     @Args('data', { type: () => EditUserInputDTO }) data: EditUserInputDTO,
     @GetCurrentUser() userId: number
   ): Promise<UserDTO> {
-    const user = await User.findOne(id);
+    const user = await User.findOneBy({ id });
 
     if (!user || user.id !== userId) {
       throw new UserErrors(

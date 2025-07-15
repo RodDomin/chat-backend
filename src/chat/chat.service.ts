@@ -18,15 +18,15 @@ export class ChatService {
   async findChatOrCreate(userId: number, friendId: number): Promise<Chat> {
     const chat = await this.chatRepository.findOne({
       where: [
-        { user1: userId, user2: friendId },
-        { user1: friendId, user2: userId }
+        { user1: {id: userId }, user2: { id: friendId } },
+        { user1: {id: friendId }, user2: { id: userId  } }
       ]
     });
 
     if (!chat) {
       const newChat = new Chat();
-      const user = await User.findOne(userId);
-      const friend = await User.findOne(friendId);
+      const user = await User.findOneBy({ id: userId });
+      const friend = await User.findOneBy({ id: friendId });
 
       newChat.user1 = user;
       newChat.user2 = friend;
@@ -40,10 +40,12 @@ export class ChatService {
   }
 
   async storeMessage(content: string, chatId: number, userId: number): Promise<Message> {
-    const chat = await this.chatRepository.findOne(chatId, {
-      relations: ['user1', 'user2']
+    const chat = await this.chatRepository.findOne({ 
+      where: { id: chatId }, 
+      relations: ['user1', 'user2'],
     });
-    const user = await User.findOne(userId);
+
+    const user = await User.findOneBy({ id: userId });
 
     const message = new Message();
     message.content = content;
@@ -58,8 +60,8 @@ export class ChatService {
   async findChats(userId: number): Promise<Chat[]> {
     const chats = await this.chatRepository.find({
       where: [
-        { user1: userId },
-        { user2: userId }
+        { user1: { id: userId } },
+        { user2: { id: userId } }
       ],
       relations: ['user1', 'user2']
     });
@@ -69,7 +71,7 @@ export class ChatService {
 
   async findMessages(chatId: number): Promise<Message[]> {
     const messages = await this.messageRepository.find({
-      where: { chat: chatId },
+      where: { chat: { id: chatId } },
       order: { createdAt: 'ASC' },
       relations: ['sender']
     });
