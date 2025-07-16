@@ -39,6 +39,7 @@ type UserDTO {
 
 type AuthDTO {
   token: String!
+  refreshToken: String!
   user: UserDTO!
 }
 

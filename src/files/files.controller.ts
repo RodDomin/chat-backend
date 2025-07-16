@@ -1,9 +1,9 @@
 import { Controller, Post, UseInterceptors, UploadedFile, UseGuards } from "@nestjs/common";
 import { UserId } from "../utils/user-id.decorator";
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuardRest } from "../auth/auth.guard";
 import { File } from "./files.entity";
 import { UserService } from "../user/user.service";
+import { AuthGuard } from "../auth/auth.guard";
 
 type IFile = Express.Multer.File;
 
@@ -13,7 +13,7 @@ export class FilesController {
     private userService: UserService
   ) {}
 
-  @UseGuards(AuthGuardRest)
+  @UseGuards(AuthGuard)
   @Post('/profile')
   @UseInterceptors(FileInterceptor('file'))
   async sendProfilePic(

@@ -1,11 +1,13 @@
 import { Module, forwardRef } from "@nestjs/common";
-import { JwtModule } from "@nestjs/jwt";
+import { JwtModule, JwtService } from "@nestjs/jwt";
 import { jwtConstants } from './auth.constants';
-import { AuthGuard, AuthGuardRest } from './auth.guard';
+import { AuthGuard } from './auth.guard';
 import { AuthService } from "./auth.service";
 import { AuthResolver } from "./resolvers/auth.resolver";
 import { UserModule } from "src/user/user.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { AUTH_PROVIDER } from "./provider/auth.provider";
+import { JwtAuthProvider } from "./provider/jwt-auth.provider";
 
 @Module({
   imports: [
@@ -21,7 +23,16 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, AuthResolver, AuthGuard, AuthGuardRest],
-  exports: [AuthService, AuthGuard, AuthGuardRest]
+  providers: [
+    AuthService,
+    AuthResolver,
+    AuthGuard,
+    {
+      provide: AUTH_PROVIDER,
+      useFactory: (service: JwtService) => new JwtAuthProvider(service),
+      inject: [JwtService]
+    }
+  ],
+  exports: [AuthService, AuthGuard]
 })
 export class AuthModule { }

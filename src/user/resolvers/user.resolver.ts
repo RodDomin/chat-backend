@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { UseFilters, UseGuards, HttpStatus } from '@nestjs/common';
+import { UseFilters, UseGuards, HttpStatus, Inject } from '@nestjs/common';
 import bcrypt from 'bcrypt';
 
 import { UserFilter } from '../exceptions/UserFilter.exception'
@@ -11,9 +11,16 @@ import { User } from '../entities';
 import { CreateUserInputDTO } from '../dtos/create-user-input.dto';
 import { EditUserInputDTO } from '../dtos/edit-user-input.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { PasswordHashProvider } from '../security/password-hash.provider';
 
 @Resolver()
 export class UserResolver {
+  constructor(
+    @Inject('PASSWORD_HASH_PROVIDER')
+    private readonly passwordHashProvider: PasswordHashProvider
+  ) {}
+
+  // TODO: add pagination
   @Query(() => [UserDTO], { name: 'users' })
   async getUsers(): Promise<UserDTO[]> {
     const users = await User.find();
@@ -49,7 +56,7 @@ export class UserResolver {
     const user = new User();
 
     user.email = data.email;
-    user.password = await bcrypt.hash(data.password, 8);
+    user.password = await this.passwordHashProvider.hash(data.password);
     user.status = data.status;
     user.name = data.name;
 

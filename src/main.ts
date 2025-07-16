@@ -5,6 +5,7 @@ import path from 'path';
 import { AppModule } from './app.module';
 
 const logger = new Logger('Bootstrap Application');
+Error.stackTraceLimit = Infinity;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

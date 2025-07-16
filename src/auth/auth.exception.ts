@@ -1,4 +1,3 @@
-import { HttpException } from "@nestjs/common";
 import { GraphQLError } from "graphql";
 
 export class AuthError extends GraphQLError {
@@ -10,15 +9,6 @@ export class AuthError extends GraphQLError {
           code,
         }
       },
-    )
-  }
-}
-
-export class AuthRestError extends HttpException {
-  constructor() {
-    super(
-      'User not authenticated',
-      401
     )
   }
 }

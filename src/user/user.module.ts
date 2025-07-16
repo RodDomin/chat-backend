@@ -6,6 +6,8 @@ import { UserResolver } from './resolvers/user.resolver'
 import { UserFilter } from './exceptions/UserFilter.exception';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserService } from './user.service';
+import { BCryptPasswordHashProvider } from './security/bcrypt-password-hash.provider';
+import { PASSWORD_HASH_PROVIDER } from './security/password-hash.provider';
 
 @Module({
 	imports: [
@@ -23,6 +25,11 @@ import { UserService } from './user.service';
 		UserService,
 		UserResolver,
 		UserFilter,
+		{
+			provide: PASSWORD_HASH_PROVIDER,
+			useFactory: () => new BCryptPasswordHashProvider(8),
+
+		}
 	]
 })
 export class UserModule {}

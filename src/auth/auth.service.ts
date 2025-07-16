@@ -1,21 +1,25 @@
 import { UserService } from '../user/user.service';
 import { AuthError } from './auth.exception';
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcrypt';
+import { Inject, Injectable } from '@nestjs/common';
 import { AUTH_CODES } from './codes/auth.codes';
 import { AuthDTO } from './dtos/auth.dto';
+import { AUTH_PROVIDER, AuthProvider } from './provider/auth.provider';
 
 interface LoginParams {
   email: string,
   password: string,
 }
 
+interface AuthPayload {
+  id: number;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private jwtService: JwtService
+    private readonly userService: UserService,
+    @Inject(AUTH_PROVIDER)
+    private readonly authProvider: AuthProvider<AuthPayload>,
   ) {}
 
   // Move the Auth Provider to a separate interface
@@ -26,25 +30,31 @@ export class AuthService {
       throw new AuthError(AUTH_CODES.userNotFound);
     }
 
-    if (!(await bcrypt.compare(password, user.password))) {
+    const isPasswordValid = await this.userService.isPasswordValid(user, password);
+
+    if (!isPasswordValid) {
       throw new AuthError(AUTH_CODES.wrongPassword);
     }
 
-    const token = this.jwtService.sign({ id: user.id });
+    const payload = { id: user.id };
+
+    const token = this.authProvider.createToken(payload);
+    const refreshToken = this.authProvider.createRefreshToken(payload);
 
     return {
       token,
+      refreshToken,
       user
     };
   }
 
-  async validateToken(token: string): Promise<any> {
-    try {
-      const data = await this.jwtService.verify(token);
-  
-      return data;
-    } catch (err) {
+  async validateToken(token: string): Promise<AuthPayload> {
+    const data = await this.authProvider.validateToken(token);
+
+    if (!data) {
       throw new AuthError(AUTH_CODES.invalidToken);
     }
+
+    return data;
   }
 }
