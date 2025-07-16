@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 
 import { UserFilter } from '../exceptions/UserFilter.exception'
 import { UserErrors, USER_ERROR_CODES } from '../exceptions/UserErrors.exception';
-import { GetCurrentUser } from 'src/utils/GetCurrentUser.util';
+import { UserId } from 'src/utils/user-id.decorator';
 import { serverData } from '../../utils/serverData';
 import { UserDTO } from '../dtos/user.dto';
 import { User } from '../entities';
@@ -14,22 +14,20 @@ import { AuthGuard } from 'src/auth/auth.guard';
 
 @Resolver()
 export class UserResolver {
-  @Query(() => [UserDTO])
+  @Query(() => [UserDTO], { name: 'users' })
   async getUsers(): Promise<UserDTO[]> {
     const users = await User.find();
 
     return users;
   }
 
-  @Query(() => UserDTO)
+  @Query(() => UserDTO, { name: 'user' })
   @UseFilters(UserFilter)
   async getUser(@Args('id') id: number): Promise<UserDTO> {
     const user = await User.findOne({
       where: { id },
       relations: ['profile']
     });
-
-    user.profile.url = `${serverData.baseUrl}/static/${user.profile.name}`
 
     if (!user) {
       throw new UserErrors(
@@ -38,6 +36,8 @@ export class UserResolver {
         HttpStatus.NOT_FOUND
       );
     }
+
+    user.profile.url = `${serverData.baseUrl}/static/${user.profile.name}`
 
     return user;
   }
@@ -63,7 +63,7 @@ export class UserResolver {
   async editUser(
     @Args('id') id: number,
     @Args('data', { type: () => EditUserInputDTO }) data: EditUserInputDTO,
-    @GetCurrentUser() userId: number
+    @UserId() userId: number
   ): Promise<UserDTO> {
     const user = await User.findOneBy({ id });
 

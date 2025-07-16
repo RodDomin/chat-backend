@@ -1,9 +1,8 @@
 import { Controller, Post, UseInterceptors, UploadedFile, UseGuards } from "@nestjs/common";
-import { GetCurrentUserRest } from "../utils/GetCurrentUser.util";
+import { UserId } from "../utils/user-id.decorator";
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuardRest } from "../auth/auth.guard";
 import { File } from "./files.entity";
-import { Express } from 'express';
 import { UserService } from "../user/user.service";
 
 type IFile = Express.Multer.File;
@@ -19,7 +18,7 @@ export class FilesController {
   @UseInterceptors(FileInterceptor('file'))
   async sendProfilePic(
     @UploadedFile() uploadedFile: IFile,
-    @GetCurrentUserRest() userId: number
+    @UserId() userId: number
   ) {
     const user = await this.userService.findOne(userId);
 

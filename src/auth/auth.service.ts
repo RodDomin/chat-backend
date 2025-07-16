@@ -18,6 +18,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
+  // Move the Auth Provider to a separate interface
   async login({ email, password }: LoginParams): Promise<AuthDTO> {
     const user = await this.userService.findByEmail(email);
 

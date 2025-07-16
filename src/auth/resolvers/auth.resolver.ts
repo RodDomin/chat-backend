@@ -8,7 +8,7 @@ export class AuthResolver {
     private authService: AuthService
   ) {}
 
-  @Mutation(() => AuthDTO)
+  @Mutation(() => AuthDTO, { name: 'authenticate' })
   async login(
     @Args('email') email: string,
     @Args('password') password: string

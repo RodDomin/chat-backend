@@ -71,8 +71,8 @@ type MessageDTO {
 }
 
 type Query {
-  getUsers: [UserDTO!]!
-  getUser(id: Float!): UserDTO!
+  users: [UserDTO!]!
+  user(id: Float!): UserDTO!
   listFriendsRequests: [FriendDTO!]!
   listFriends: [FriendDTO!]!
   listChats: [ChatDTO!]!
@@ -81,12 +81,12 @@ type Query {
 
 type Mutation {
   createUser(data: CreateUserInputDTO!): UserDTO!
-  editUser(data: EditUserInputDTO!, id: Float!): UserDTO!
-  login(password: String!, email: String!): AuthDTO!
+  editUser(id: Float!, data: EditUserInputDTO!): UserDTO!
+  authenticate(email: String!, password: String!): AuthDTO!
   sendFriendRequest(id: Float!): FriendDTO!
   rejectFriend(id: Float!): FriendDTO!
   acceptFriend(id: Float!): FriendDTO!
-  sendMessage(content: String!, chatId: Float!): MessageDTO!
+  sendMessage(chatId: Float!, content: String!): MessageDTO!
   createChat(friendId: Float!): ChatDTO!
 }
 

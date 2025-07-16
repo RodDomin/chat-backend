@@ -3,7 +3,7 @@ import { UseGuards, UseFilters, HttpStatus } from "@nestjs/common";
 
 import { FriendsService } from "../friends.service";
 import { AuthGuard } from '../../auth/auth.guard';
-import { GetCurrentUser } from "src/utils/GetCurrentUser.util";
+import { UserId } from "src/utils/user-id.decorator";
 import { FriendsFilter } from '../exceptions/friends.filter';
 import { FriendDTO } from "../dtos/friend.dto";
 import { FriendsErrors, FRIENDS_ERROR_CODES } from "../exceptions/friends.exception";
@@ -18,7 +18,7 @@ export class FriendsResolver {
   @UseGuards(AuthGuard)
   async sendFriendRequest(
     @Args('id') friendId: number,
-    @GetCurrentUser() userId: number
+    @UserId() userId: number
   ): Promise<FriendDTO> {
     const requestExists = await this.friendsService.findBySenderOrRecipient(userId, friendId);
 
@@ -30,12 +30,12 @@ export class FriendsResolver {
       )
     }
 
-    const friend_request = await this.friendsService.store(
+    const friendRequest = await this.friendsService.store(
       userId,
       friendId
     );
 
-    return friend_request;
+    return friendRequest;
   }
 
   @Mutation(() => FriendDTO)
@@ -43,7 +43,7 @@ export class FriendsResolver {
   @UseFilters(FriendsFilter)
   async rejectFriend(
     @Args('id') friendId: number,
-    @GetCurrentUser() userId: number
+    @UserId() userId: number
   ): Promise<FriendDTO> {
     const request = await this.friendsService.findOne(userId)
 
@@ -55,11 +55,11 @@ export class FriendsResolver {
       )
     }
 
-    const friend_request = await this.friendsService.reject(
+    const friendRequest = await this.friendsService.reject(
       request.id
     );
 
-    return friend_request;
+    return friendRequest;
   }
 
   @Mutation(() => FriendDTO)
@@ -67,7 +67,7 @@ export class FriendsResolver {
   @UseFilters(FriendsFilter)
   async acceptFriend(
     @Args('id') friendId: number,
-    @GetCurrentUser() userId: number
+    @UserId() userId: number
   ): Promise<FriendDTO> {
     const request = await this.friendsService.findOne(userId)
 
@@ -79,17 +79,17 @@ export class FriendsResolver {
       )
     }
 
-    const friend_request = await this.friendsService.accept(
+    const friendRequest = await this.friendsService.accept(
       request.id
     );
 
-    return friend_request;
+    return friendRequest;
   }
 
   @Query(() => [FriendDTO])
   @UseGuards(AuthGuard)
   async listFriendsRequests(
-    @GetCurrentUser() userId: number
+    @UserId() userId: number
   ): Promise<FriendDTO[]> {
     const friendsRequests = await this.friendsService.listRequests(userId);
 
@@ -99,7 +99,7 @@ export class FriendsResolver {
   @Query(() => [FriendDTO])
   @UseGuards(AuthGuard)
   async listFriends(
-    @GetCurrentUser() userId: number
+    @UserId() userId: number
   ): Promise<FriendDTO[]> {
     const friends = await this.friendsService.listFriends(userId);
 

@@ -18,8 +18,8 @@ export class ChatService {
   async findChatOrCreate(userId: number, friendId: number): Promise<Chat> {
     const chat = await this.chatRepository.findOne({
       where: [
-        { user1: {id: userId }, user2: { id: friendId } },
-        { user1: {id: friendId }, user2: { id: userId  } }
+        { user1: { id: userId }, user2: { id: friendId } },
+        { user1: { id: friendId }, user2: { id: userId  } }
       ]
     });
 
