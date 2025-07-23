@@ -7,70 +7,63 @@ import { UserId } from "src/utils/user-id.decorator";
 import { FriendsFilter } from '../exceptions/friends.filter';
 import { FriendDTO } from "../dtos/friend.dto";
 import { FriendsErrors, FRIENDS_ERROR_CODES } from "../exceptions/friends.exception";
+import { Friend } from "../entities/friend.entity";
 
 @Resolver()
+@UseGuards(AuthGuard)
 export class FriendsResolver {
   constructor(
     private readonly friendsService: FriendsService
   ) {}
 
   @Mutation(() => FriendDTO)
-  @UseGuards(AuthGuard)
   async sendFriendRequest(
-    @Args('id') friendId: number,
+    @Args('id') requestedId: number,
     @UserId() userId: number
   ): Promise<FriendDTO> {
-    const requestExists = await this.friendsService.findBySenderOrRecipient(userId, friendId);
+    const requestExists = await this.friendsService.findBySenderOrRecipient(userId, requestedId);
 
     if (requestExists) {
       throw new FriendsErrors(
-        'friend request already be created',
+        'the relationship between these users already exist created',
         FRIENDS_ERROR_CODES.FRIEND_REQUEST_ALREADY_BE_CREATED,
         HttpStatus.UNAUTHORIZED
-      )
+      );
     }
 
     const friendRequest = await this.friendsService.store(
       userId,
-      friendId
+      requestedId
     );
 
     return friendRequest;
   }
 
   @Mutation(() => FriendDTO)
-  @UseGuards(AuthGuard)
   @UseFilters(FriendsFilter)
   async rejectFriend(
-    @Args('id') friendId: number,
+    @Args('id') requestedId: number,
     @UserId() userId: number
   ): Promise<FriendDTO> {
-    const request = await this.friendsService.findOne(userId)
-
-    if (!request) {
-      throw new FriendsErrors(
-        'friend request not found',
-        FRIENDS_ERROR_CODES.REQUEST_NOT_FOUND,
-        HttpStatus.NOT_FOUND
-      )
-    }
-
-    const friendRequest = await this.friendsService.reject(
-      request.id
+    return this.updateFriendStatus(
+      await this.friendsService.findFriendRequest(userId, requestedId), 
+      'reject'
     );
-
-    return friendRequest;
   }
 
   @Mutation(() => FriendDTO)
-  @UseGuards(AuthGuard)
   @UseFilters(FriendsFilter)
-  async acceptFriend(
-    @Args('id') friendId: number,
+  async acceptRequest(
+    @Args('id') requestedId: number,
     @UserId() userId: number
   ): Promise<FriendDTO> {
-    const request = await this.friendsService.findOne(userId)
+    return this.updateFriendStatus(
+      await this.friendsService.findFriendRequest(userId, requestedId), 
+      'accept'
+    );
+  }
 
+  private async updateFriendStatus(request: Friend, newStatus: 'accept' | 'reject') {
     if (!request) {
       throw new FriendsErrors(
         'friend request not found',
@@ -79,7 +72,7 @@ export class FriendsResolver {
       )
     }
 
-    const friendRequest = await this.friendsService.accept(
+    const friendRequest = await this.friendsService[newStatus](
       request.id
     );
 
@@ -87,7 +80,6 @@ export class FriendsResolver {
   }
 
   @Query(() => [FriendDTO])
-  @UseGuards(AuthGuard)
   async listFriendsRequests(
     @UserId() userId: number
   ): Promise<FriendDTO[]> {
@@ -97,7 +89,6 @@ export class FriendsResolver {
   }
 
   @Query(() => [FriendDTO])
-  @UseGuards(AuthGuard)
   async listFriends(
     @UserId() userId: number
   ): Promise<FriendDTO[]> {

@@ -13,6 +13,10 @@ import {
 import { User } from "src/user/entities";
 import { FRIEND_STATUS } from "../utils/friends.util";
 
+/**
+ * Friend is a pivot table that enables a relationship 
+ * between two different users
+ */
 @Entity({
   name: 'friend'
 })

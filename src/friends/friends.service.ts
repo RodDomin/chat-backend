@@ -12,7 +12,7 @@ export class FriendsService {
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
     private readonly userService: UserService
-  ) {}
+  ) { }
 
   async listRequests(id: number): Promise<Friend[]> {
     return await this.friendRepository.find({
@@ -51,7 +51,7 @@ export class FriendsService {
   accept(id: number): Promise<Friend> {
     return this.updateFriendStatus(id, FRIEND_STATUS.ACCEPTED);
   }
-  
+
   reject(id: number): Promise<Friend> {
     return this.updateFriendStatus(id, FRIEND_STATUS.REJECTED);
   }
@@ -82,5 +82,9 @@ export class FriendsService {
     });
   }
 
-  // async block(userId: number) {}
+  findFriendRequest(senderId: number, recipientId: number) {
+    return this.friendRepository.findOne({
+      where: { recipient: { id: recipientId }, sender: { id: senderId } }
+    });
+  }
 }

@@ -4,14 +4,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AUTH_CODES } from './codes/auth.codes';
 import { AuthDTO } from './dtos/auth.dto';
 import { AUTH_PROVIDER, AuthProvider } from './provider/auth.provider';
+import { AuthPayload } from './auth.payload';
 
 interface LoginParams {
   email: string,
   password: string,
-}
-
-interface AuthPayload {
-  id: number;
 }
 
 @Injectable()
@@ -22,7 +19,6 @@ export class AuthService {
     private readonly authProvider: AuthProvider<AuthPayload>,
   ) {}
 
-  // Move the Auth Provider to a separate interface
   async login({ email, password }: LoginParams): Promise<AuthDTO> {
     const user = await this.userService.findByEmail(email);
 

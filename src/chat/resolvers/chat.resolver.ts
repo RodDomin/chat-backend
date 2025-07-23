@@ -1,6 +1,5 @@
 import { Resolver, Mutation, Query, Args, Subscription } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
-import { PubSub } from "graphql-subscriptions";
+import { Inject, UseGuards } from '@nestjs/common';
 
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UserId } from 'src/utils/user-id.decorator';
@@ -8,13 +7,15 @@ import { UserId } from 'src/utils/user-id.decorator';
 import { ChatDTO } from '../dtos/chat.dto';
 import { MessageDTO } from '../dtos/messages.dto';
 import { ChatService } from '../chat.service';
+import { PUB_SUB_PROVIDER, PubSubProvider } from '../provider/pub-sub.provider';
+import { Message } from '../entities/messages.entity';
 
 @Resolver()
 export class ChatResolver {
-  private pubSub = new PubSub();
-
   constructor(
-    private readonly chatService: ChatService
+    private readonly chatService: ChatService,
+    @Inject(PUB_SUB_PROVIDER)
+    private readonly pubSub: PubSubProvider<Message>,
   ) {}
 
   @Mutation(() => MessageDTO)
@@ -36,7 +37,7 @@ export class ChatResolver {
       ? user2.id
       : user1.id;
 
-    this.pubSub.publish(`watchMessages:${userToSendMessage}`, { watchMessages: message });
+    this.pubSub.publish(`watchMessages:${userToSendMessage}`, message);
 
     return message;
   }
@@ -77,6 +78,6 @@ export class ChatResolver {
   public async watchMessages(
     @UserId() userId: number
   ) {
-    return this.pubSub.asyncIterableIterator(`watchMessages:${userId}`)
+    return this.pubSub.watch(`watchMessages:${userId}`)
   }
 }
