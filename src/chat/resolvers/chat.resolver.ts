@@ -37,40 +37,34 @@ export class ChatResolver {
       ? user2.id
       : user1.id;
 
-    this.pubSub.publish(`watchMessages:${userToSendMessage}`, message);
+    await this.pubSub.publish(`watchMessages:${userToSendMessage}`, message);
 
     return message;
   }
 
   @Mutation(() => ChatDTO)
   @UseGuards(AuthGuard)
-  public async createChat(
+  public createChat(
     @Args('friendId') friendId: number,
     @UserId() userId: number
   ): Promise<ChatDTO> {
-    const chat = await this.chatService.findChatOrCreate(userId, friendId);
-
-    return chat;
+    return this.chatService.findChatOrCreate(userId, friendId);
   }
 
   @Query(() => [ChatDTO])
   @UseGuards(AuthGuard)
-  public async listChats(
+  public listChats(
     @UserId() userId: number
   ): Promise<ChatDTO[]> {
-    const chats = await this.chatService.findChats(userId);
-
-    return chats;
+    return this.chatService.findChats(userId);
   }
 
   @Query(() => [MessageDTO])
   @UseGuards(AuthGuard)
-  public async listMessages(
+  public listMessages(
     @Args('chatId') chatId: number,
   ): Promise<MessageDTO[]> {
-    const messages = await this.chatService.findMessages(chatId);
-
-    return messages;
+    return this.chatService.findMessages(chatId);
   }
 
   @Subscription(() => MessageDTO)
